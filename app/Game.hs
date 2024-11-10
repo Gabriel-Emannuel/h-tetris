@@ -4,7 +4,7 @@ import Graphics.Gloss
 
 import Components (renderBoard, renderText, renderNextPiece)
 
-import State (originalState, State(..), rotateLeftState, moveLeftState, moveRightState, moveDownState, rotateRightState, incrementScore)
+import State (originalState, State(..), rotateLeftState, moveLeftState, moveRightState, moveDownState, moveSpaceState, rotateRightState, incrementScore)
 
 import Graphics.Gloss.Interface.IO.Game (playIO, Event (EventKey), Key (Char, SpecialKey), KeyState (Down), SpecialKey (KeyLeft, KeyRight, KeyDown, KeySpace))
 import Data.Char (toLower)
@@ -27,8 +27,8 @@ inputKeyboard (EventKey (Char t) Down _ _ ) state
 inputKeyboard (EventKey (SpecialKey tecla) Down _ _) state
   | tecla == KeyLeft = return $ moveLeftState state
   | tecla == KeyRight = return $ moveRightState state
-  | tecla == KeyDown = return $ incrementScore (moveDownState state) 10
-  | tecla == KeySpace = return  state
+  | tecla == KeyDown = return $ moveDownState state
+  | tecla == KeySpace = return $ moveSpaceState state
   | otherwise = return state
 
 inputKeyboard _ state = return state

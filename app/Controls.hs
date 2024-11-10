@@ -5,6 +5,7 @@ module Controls (
     moveLeft,
     moveRight,
     moveDown,
+    moveSpace
 ) where
 
 import Pieces (isPiece, isFreeze)
@@ -88,3 +89,12 @@ moveDownCell upper lower
     | isPiece upper = upper
     | isPiece lower = 0
     | otherwise     = lower
+
+---
+
+moveSpace :: [[Int]] -> ([[Int]], Int)
+moveSpace board 
+    | (not . isPossibleMoveDown) board = (board, 0)
+    | otherwise = (boardMovedDown, succ moves)
+        where
+            (boardMovedDown, moves) = (moveSpace . moveDown) board 

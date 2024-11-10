@@ -1,11 +1,21 @@
 module State where
 
 import Pieces (
-    buildPiece, freezeBoard, preparePieceToPut, isPossiblePutPiece, putPiece, rotatePieceLeft, rotatePieceRight, discoverCoordenates, removePiece
+    buildPiece,
+    freezeBoard,
+    preparePieceToPut,
+    isPossiblePutPiece,
+    putPiece,
+    rotatePieceLeft,
+    rotatePieceRight,
+    discoverCoordenates,
+    removePiece
     )
 
+import ClearGame (clearGame)
+
 import Controls (
-    isPossibleMoveDown, moveDown,
+    isPossibleMoveDown, moveDown, moveSpace,
     isPossibleMoveLeft, moveLeft,
     isPossibleMoveRight, moveRight)
 
@@ -38,7 +48,7 @@ originalState = State {
         originalBoard = [[0 | _ <- [0..9]] | _ <- [0..19]]
         (firstPiece, (xo, yo), (xf, yf)) = buildPiece 0
         firstPiecePrepared = preparePieceToPut firstPiece (xo, yo) (xf, yf)
-        (nextPiece'', _, _) = buildPiece 1 
+        (nextPiece'', _, _) = buildPiece 1
 ---
 
 incrementScore :: State -> Int -> State
@@ -50,20 +60,27 @@ updateState :: State -> State
 updateState state
     | isPossiblePutPiece (board state) newPiecePrepared =
         state {
-            board = putPiece (freezeBoard (board state)) newPiecePrepared,
-            nextPiece = calculateNext (totalLines state) (time state) (score state),
+            board = putPiece newBoard newPiecePrepared,
+            nextPiece = calculateNext (level state) (totalLines state) (time state) (score state),
             piece = newPiece,
-            nextPiece' = nextPiece''
+            nextPiece' = nextPiece'',
+            totalLines = newTotalLines,
+            level = newTotalLines `div` 10,
+            score = newScore
             }
     | otherwise = state {loseGame = True}
     where
-        (nextPiece'', _, _) = buildPiece (calculateNext (totalLines state) (time state) (score state))
+        (nextPiece'', _, _) = buildPiece (calculateNext (level state) (totalLines state) (time state) (score state))
         (newPiece, (xo, yo), (xf, yf)) = buildPiece (nextPiece state)
         newPiecePrepared = preparePieceToPut newPiece (xo,yo) (xf,yf)
+        (newBoard, linesAdd) = (clearGame . freezeBoard) (board state)
+        newTotalLines = totalLines state + linesAdd
+        newLevel = newTotalLines `mod` 10
+        newScore = linesAdd * newLevel + score state
 
-calculateNext :: Int -> Int -> Int -> Int
-calculateNext lines' time' score' =
-    time' + lines' + score' `mod` time'
+calculateNext :: Int -> Int -> Int -> Int -> Int
+calculateNext level' lines' time' score' =
+    time' + lines' + score' `mod` (time' + level')
 
 ---
 
@@ -79,18 +96,25 @@ moveLeftState state
 
 moveDownState :: State -> State
 moveDownState state
-    | isPossibleMoveDown (board state) = state {board = moveDown (board state)}
+    | isPossibleMoveDown (board state) = incrementScore (state {board = moveDown (board state)}) 10
     | otherwise = updateState state
+
+moveSpaceState :: State -> State
+moveSpaceState state
+    | isPossibleMoveDown (board state) = updateState $ incrementScore (state {board = newBoard}) (moveDowns * 15)
+    | otherwise = updateState state
+    where 
+        (newBoard, moveDowns) = moveSpace (board state)
 
 ---
 
 rotateRightState :: State -> State
-rotateRightState state 
-    | isPossiblePutPiece (removePiece (board state)) pieceRotatedPrepared = 
+rotateRightState state
+    | isPossiblePutPiece (removePiece (board state)) pieceRotatedPrepared =
         state {
             board = putPiece (removePiece (board state)) pieceRotatedPrepared,
             piece = pieceRotated
-        } 
+        }
     | otherwise = state
     where
         pieceRotated = rotatePieceRight (piece state)
@@ -99,12 +123,12 @@ rotateRightState state
 
 
 rotateLeftState :: State -> State
-rotateLeftState state 
-    | isPossiblePutPiece (removePiece (board state)) pieceRotatedPrepared = 
+rotateLeftState state
+    | isPossiblePutPiece (removePiece (board state)) pieceRotatedPrepared =
         state {
             board = putPiece (removePiece (board state)) pieceRotatedPrepared,
             piece = pieceRotated
-        } 
+        }
     | otherwise = state
     where
         pieceRotated = rotatePieceLeft (piece state)
