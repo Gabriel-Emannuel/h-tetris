@@ -4,11 +4,10 @@ import Graphics.Gloss
 
 import Components (renderBoard, renderText, renderNextPiece)
 
-import State (originalState, State(..), rotateLeftState, moveLeftState, moveRightState, moveDownState, rotateRightState)
+import State (originalState, State(..), rotateLeftState, moveLeftState, moveRightState, moveDownState, rotateRightState, incrementScore)
 
 import Graphics.Gloss.Interface.IO.Game (playIO, Event (EventKey), Key (Char, SpecialKey), KeyState (Down), SpecialKey (KeyLeft, KeyRight, KeyDown, KeySpace))
 import Data.Char (toLower)
-import Data.List (nub)
 
 game :: IO ()
 game = playIO (InWindow "Tetris" (1200, 800) (10,10)) white 60 originalState renderMain inputKeyboard updateGame
@@ -18,7 +17,7 @@ game = playIO (InWindow "Tetris" (1200, 800) (10,10)) white 60 originalState ren
 inputKeyboard :: Event -> State -> IO State
 
 inputKeyboard (EventKey (Char t) Down _ _ ) state
-  | t' /= 'r' = return state
+  | t' == 'r' = return originalState
   | t' == 'z' = return $ rotateLeftState state
   | t' == 'x' = return $ rotateRightState state
   | otherwise = return state
@@ -28,11 +27,11 @@ inputKeyboard (EventKey (Char t) Down _ _ ) state
 inputKeyboard (EventKey (SpecialKey tecla) Down _ _) state
   | tecla == KeyLeft = return $ moveLeftState state
   | tecla == KeyRight = return $ moveRightState state
-  | tecla == KeyDown = return $ moveDownState state
-  | tecla == KeySpace = return state
+  | tecla == KeyDown = return $ incrementScore (moveDownState state) 10
+  | tecla == KeySpace = return  state
   | otherwise = return state
-inputKeyboard _ state = return state
 
+inputKeyboard _ state = return state
 ---
 
 updateGame :: Float -> State -> IO State
@@ -57,22 +56,22 @@ renderMain state = return $ pictures [
   boxBoard, boxLevel, boxTotalLines, boxScore,
   boxTime ,boxNextPiece, boxOver,
   boxCommandA, boxCommandD, boxCommandS, boxCommandR,
-  boxCommandK, boxCommandL, boxCommandX]
+  boxCommandK, boxCommandL]
   where
     boxBoard = renderBoard (board state) (-150, -300)
     boxLevel = renderText "Level" (show (level state)) (150, -200, 0.2, 0.2)
-    boxTotalLines = renderText "TotalLines" (show (totalLines state)) (150, -250, 0.2, 0.2)
+    boxTotalLines = renderText "Lines" (show (totalLines state)) (150, -250, 0.2, 0.2)
     boxScore = renderText "Score" (show (score state)) (150, -150, 0.2, 0.2)
     boxTime = renderText "Time" (show (time state)) (150, -300, 0.2, 0.2)
-    boxNextPiece = renderNextPiece (filter (\line -> length (nub line) == 1 && (head . nub) line /= 0) (piece state)) (150, -20) (180, -60)
-    boxCommandA = renderText "seta pra esquerda mover pra esquerda" "" (-420, 250, 0.1, 0.1)
-    boxCommandD = renderText "seta pra direita mover pra direita" "" (-420, 200, 0.1, 0.1)
-    boxCommandS = renderText "seta pra baixo mover pra Baixo" "" (-420, 150, 0.1, 0.1)
-    boxCommandR = renderText "R - reniciar Jogo" "" (-420, 100, 0.1, 0.1)
-    boxCommandK = renderText "Z - Rotacionar anti-horario" "" (-420, 50, 0.1, 0.1)
-    boxCommandL = renderText "X - Rotacionar horario" "" (-420, 1, 0.1, 0.1)
-    boxCommandX = renderText "espaco - Jogar a peca pra baixo" "" (-420, -50, 0.1, 0.1)
+    boxNextPiece = renderNextPiece (reverse (nextPiece' state)) (300, -20) (180, -60)
+    boxCommandA = renderText "Left Arrow - Move Left" "" (-420, 250, 0.1, 0.1)
+    boxCommandD = renderText "Right Arrow - Move Right" "" (-420, 200, 0.1, 0.1)
+    boxCommandS = renderText "Down Arrow - Move Down" "" (-420, 150, 0.1, 0.1)
+    boxCommandR = renderText "R - Restart Game" "" (-420, 100, 0.1, 0.1)
+    boxCommandK = renderText "Z - Rotate Left" "" (-420, 50, 0.1, 0.1)
+    boxCommandL = renderText "X - Rotate Right" "" (-420, 1, 0.1, 0.1)
+    -- boxCommandX = renderText "Space - Put the piece down" "" (-420, -50, 0.1, 0.1)
     boxOver
-      | loseGame state = renderText "Voce" "Perdeu" (150, 100, 0.2, 0.2)
-      | winGame state = renderText "Voce" "Venceu" (150, 100, 0.2, 0.2)
+      | loseGame state = renderText "You" "Lose" (150, 100, 0.2, 0.2)
+      | winGame state = renderText "You" "Win" (150, 100, 0.2, 0.2)
       | otherwise = renderText "" "" (150, -350, 0.2, 0.2)

@@ -173,4 +173,4 @@ findVerticalCoordenates board = (yo, 19 - yf)
     where
         containsPieces = map (filter isPiece) board
         Just yo = findIndex (not . null) containsPieces
-        Just yf = findIndex (not . null) (map reverse containsPieces)
+        Just yf = findIndex (not . null) (reverse containsPieces)

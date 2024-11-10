@@ -39,7 +39,7 @@ isPossibleMoveDownLine :: [[Int]] -> [[Int]] -> Bool
 isPossibleMoveDownLine tailBoard initBoard = all and $ zipWith (zipWith isPossibleMoveDownCell) tailBoard initBoard
 
 isPossibleMoveDownCell :: Int -> Int -> Bool
-isPossibleMoveDownCell p1 p2 = not (isFreeze p2 && isPiece p1)
+isPossibleMoveDownCell p1 p2 = not (isFreeze p1 && isPiece p2)
 
 isPossibleMoveDownLastLine :: [Int] -> Bool
 isPossibleMoveDownLastLine = not . any isPiece
@@ -75,7 +75,7 @@ swapRight _ = error "This shouldn't happen"
 ---
 
 moveDown :: [[Int]] -> [[Int]]
-moveDown board =
+moveDown board = 
     map clearBoard (head board) : zipWith (zipWith moveDownCell) (init board) (tail board)
 
 clearBoard :: Int -> Int
@@ -86,4 +86,5 @@ clearBoard p
 moveDownCell :: Int -> Int -> Int
 moveDownCell upper lower 
     | isPiece upper = upper
+    | isPiece lower = 0
     | otherwise     = lower

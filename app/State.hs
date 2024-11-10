@@ -1,7 +1,7 @@
 module State where
 
 import Pieces (
-    buildPiece, freezeBoard, preparePieceToPut, isPossiblePutPiece, putPiece, rotatePieceLeft, rotatePieceRight, discoverCoordenates
+    buildPiece, freezeBoard, preparePieceToPut, isPossiblePutPiece, putPiece, rotatePieceLeft, rotatePieceRight, discoverCoordenates, removePiece
     )
 
 import Controls (
@@ -20,7 +20,8 @@ data State = State {
     winGame :: Bool,
     loseGame :: Bool,
     framesPast :: Int,
-    framesNeed :: Int
+    framesNeed :: Int,
+    nextPiece' :: [[Int]]
 } deriving (Show)
 
 ---
@@ -28,14 +29,16 @@ data State = State {
 originalState :: State
 originalState = State {
     board = putPiece originalBoard firstPiecePrepared,
-    totalLines = 0, level = 0, time = 0, score = 0,
+    totalLines = 0, level = 1, time = 0, score = 0,
     piece = firstPiece, nextPiece = 1, loseGame = False,
-    framesPast = 0, framesNeed = 60, winGame = False
+    framesPast = 0, framesNeed = 60, winGame = False,
+    nextPiece' = nextPiece''
     }
     where
         originalBoard = [[0 | _ <- [0..9]] | _ <- [0..19]]
         (firstPiece, (xo, yo), (xf, yf)) = buildPiece 0
         firstPiecePrepared = preparePieceToPut firstPiece (xo, yo) (xf, yf)
+        (nextPiece'', _, _) = buildPiece 1 
 ---
 
 incrementScore :: State -> Int -> State
@@ -49,16 +52,18 @@ updateState state
         state {
             board = putPiece (freezeBoard (board state)) newPiecePrepared,
             nextPiece = calculateNext (totalLines state) (time state) (score state),
-            piece = newPiece
+            piece = newPiece,
+            nextPiece' = nextPiece''
             }
     | otherwise = state {loseGame = True}
     where
+        (nextPiece'', _, _) = buildPiece (calculateNext (totalLines state) (time state) (score state))
         (newPiece, (xo, yo), (xf, yf)) = buildPiece (nextPiece state)
         newPiecePrepared = preparePieceToPut newPiece (xo,yo) (xf,yf)
 
 calculateNext :: Int -> Int -> Int -> Int
 calculateNext lines' time' score' =
-    score' `mod` (lines' + time')
+    time' + lines' + score' `mod` time'
 
 ---
 
@@ -81,9 +86,9 @@ moveDownState state
 
 rotateRightState :: State -> State
 rotateRightState state 
-    | isPossiblePutPiece (board state) pieceRotatedPrepared = 
+    | isPossiblePutPiece (removePiece (board state)) pieceRotatedPrepared = 
         state {
-            board = putPiece (board state) pieceRotatedPrepared,
+            board = putPiece (removePiece (board state)) pieceRotatedPrepared,
             piece = pieceRotated
         } 
     | otherwise = state
@@ -95,9 +100,9 @@ rotateRightState state
 
 rotateLeftState :: State -> State
 rotateLeftState state 
-    | isPossiblePutPiece (board state) pieceRotatedPrepared = 
+    | isPossiblePutPiece (removePiece (board state)) pieceRotatedPrepared = 
         state {
-            board = putPiece (board state) pieceRotatedPrepared,
+            board = putPiece (removePiece (board state)) pieceRotatedPrepared,
             piece = pieceRotated
         } 
     | otherwise = state
