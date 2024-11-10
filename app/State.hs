@@ -25,6 +25,19 @@ data State = State {
 
 ---
 
+originalState :: State
+originalState = State {
+    board = putPiece originalBoard firstPiecePrepared,
+    totalLines = 0, level = 0, time = 0, score = 0,
+    piece = firstPiece, nextPiece = 1, loseGame = False,
+    framesPast = 0, framesNeed = 60, winGame = False
+    }
+    where
+        originalBoard = [[0 | _ <- [0..9]] | _ <- [0..19]]
+        (firstPiece, (xo, yo), (xf, yf)) = buildPiece 0
+        firstPiecePrepared = preparePieceToPut firstPiece (xo, yo) (xf, yf)
+---
+
 incrementScore :: State -> Int -> State
 incrementScore state newScore = state {score = (level state * newScore) + score state}
 
