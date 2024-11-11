@@ -4,7 +4,7 @@ import Graphics.Gloss
 
 import Components (renderBoard, renderText, renderNextPiece)
 
-import State (originalState, State(..), rotateLeftState, moveLeftState, moveRightState, moveDownState, moveSpaceState, rotateRightState, incrementScore)
+import State (originalState, State(..), rotateLeftState, moveLeftState, moveRightState, moveDownState, moveSpaceState, rotateRightState, incrementScore, getPiece, holdPieceState)
 
 import Graphics.Gloss.Interface.IO.Game (playIO, Event (EventKey), Key (Char, SpecialKey), KeyState (Down), SpecialKey (KeyLeft, KeyRight, KeyDown, KeySpace))
 import Data.Char (toLower)
@@ -20,6 +20,7 @@ inputKeyboard (EventKey (Char t) Down _ _ ) state
   | t' == 'r' = return originalState
   | t' == 'z' = return $ rotateLeftState state
   | t' == 'x' = return $ rotateRightState state
+  | t' == 'c' = return $ holdPieceState state
   | otherwise = return state
   where
     t' = toLower t
@@ -56,21 +57,22 @@ renderMain state = return $ pictures [
   boxBoard, boxLevel, boxTotalLines, boxScore,
   boxTime ,boxNextPiece, boxOver,
   boxCommandA, boxCommandD, boxCommandS, boxCommandR,
-  boxCommandK, boxCommandL]
+  boxCommandK, boxCommandL, boxHoldPiece, boxCommandX]
   where
     boxBoard = renderBoard (board state) (-150, -300)
     boxLevel = renderText "Level" (show (level state)) (150, -200, 0.2, 0.2)
     boxTotalLines = renderText "Lines" (show (totalLines state)) (150, -250, 0.2, 0.2)
     boxScore = renderText "Score" (show (score state)) (150, -150, 0.2, 0.2)
     boxTime = renderText "Time" (show (time state)) (150, -300, 0.2, 0.2)
-    boxNextPiece = renderNextPiece (reverse (nextPiece' state)) (300, -20) (180, -60)
+    boxNextPiece = renderNextPiece (reverse (getPiece (nextPiece state))) (300, -20) (180, -60) "Next Piece"
+    boxHoldPiece = renderNextPiece (reverse (getPiece (holdPiece state))) (300, 120) (180, 120) "Hold Piece" 
     boxCommandA = renderText "Left Arrow - Move Left" "" (-420, 250, 0.1, 0.1)
     boxCommandD = renderText "Right Arrow - Move Right" "" (-420, 200, 0.1, 0.1)
     boxCommandS = renderText "Down Arrow - Move Down" "" (-420, 150, 0.1, 0.1)
     boxCommandR = renderText "R - Restart Game" "" (-420, 100, 0.1, 0.1)
     boxCommandK = renderText "Z - Rotate Left" "" (-420, 50, 0.1, 0.1)
     boxCommandL = renderText "X - Rotate Right" "" (-420, 1, 0.1, 0.1)
-    -- boxCommandX = renderText "Space - Put the piece down" "" (-420, -50, 0.1, 0.1)
+    boxCommandX = renderText "Space - Put the piece down" "" (-420, -50, 0.1, 0.1)
     boxOver
       | loseGame state = renderText "You" "Lose" (150, 100, 0.2, 0.2)
       | winGame state = renderText "You" "Win" (150, 100, 0.2, 0.2)

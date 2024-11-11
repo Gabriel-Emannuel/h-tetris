@@ -19,11 +19,11 @@ renderBoard board (xP, yP) = translate xP yP $ pictures $ zipWith (curry renderL
         | (cell `mod` 10) == 7 = red
         | otherwise = error "Color doesn't exist"
 
-renderNextPiece :: [[Int]] -> (Float, Float) -> (Float, Float) -> Picture
-renderNextPiece piece (xtext'', ytext'') (xpiece, ypiece) = pictures [nextPiece, text']
+renderNextPiece :: [[Int]] -> (Float, Float) -> (Float, Float) -> String -> Picture
+renderNextPiece piece (xtext'', ytext'') (xpiece, ypiece) text' = pictures [nextPiece, text'']
   where
     nextPiece = renderBoard (reverse piece) (xpiece, ypiece)
-    text' = translate xtext'' ytext'' $ scale 0.2 0.2 $ color black $ text "Next Piece"
+    text'' = translate xtext'' ytext'' $ scale 0.2 0.2 $ color black $ text text'
 
 renderText :: String -> String -> (Float, Float, Float, Float) -> Picture
 renderText text1 text2 (xPosition, yPosition, height, width) = 
