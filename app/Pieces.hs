@@ -96,7 +96,7 @@ preparePieceToPut piece (xo, yo) (xf, yf) =
 isPossiblePutPiece :: [[Int]] -> [[Int]] -> Bool
 isPossiblePutPiece board piece = all and validPoints
     where
-        validPoints = zipWith (zipWith (\pBoard pPiece -> not (isPiece pBoard && isPiece pPiece))) board piece
+        validPoints = zipWith (zipWith (\pBoard pPiece -> not (isPiece pPiece) || isEmpty pBoard)) board piece
 
 --
 
