@@ -17,6 +17,7 @@ renderBoard board (xP, yP) = translate xP yP $ pictures $ zipWith (curry renderL
         | (cell `mod` 10) == 5 = green
         | (cell `mod` 10) == 6 = violet
         | (cell `mod` 10) == 7 = red
+        | (cell `mod` 10) == 8 = dark white
         | otherwise = error "Color doesn't exist"
 
 renderNextPiece :: [[Int]] -> (Float, Float) -> (Float, Float) -> String -> Picture

@@ -39,7 +39,6 @@ updateGame :: Float -> State -> IO State
 updateGame t state = if t == 1/60 then changeState else return state
   where
     stateDown = moveDownState state
-    -- (gridLimpa, qtdTotalLinesLimpas) = clearGame (grid state)
     changeState
       | level state == 10 = return state {winGame = True}
       | loseGame state = return state
@@ -74,6 +73,6 @@ renderMain state = return $ pictures [
     boxCommandL = renderText "X - Rotate Right" "" (-420, 1, 0.1, 0.1)
     boxCommandX = renderText "Space - Put the piece down" "" (-420, -50, 0.1, 0.1)
     boxOver
-      | loseGame state = renderText "You" "Lose" (150, 100, 0.2, 0.2)
-      | winGame state = renderText "You" "Win" (150, 100, 0.2, 0.2)
+      | loseGame state = renderText "You" "Lose" (-75, 300, 0.2, 0.2)
+      | winGame state = renderText "You" "Win" (-75, 300, 0.2, 0.2)
       | otherwise = renderText "" "" (150, -350, 0.2, 0.2)
