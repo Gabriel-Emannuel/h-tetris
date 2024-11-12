@@ -56,7 +56,7 @@ renderMain state = return $ pictures [
   boxBoard, boxLevel, boxTotalLines, boxScore,
   boxTime ,boxNextPiece, boxOver,
   boxCommandA, boxCommandD, boxCommandS, boxCommandR,
-  boxCommandK, boxCommandL]
+  boxCommandK, boxCommandL, boxCommandX]
   where
     boxBoard = renderBoard (board state) (-150, -300)
     boxLevel = renderText "Level" (show (level state)) (150, -200, 0.2, 0.2)
@@ -70,7 +70,7 @@ renderMain state = return $ pictures [
     boxCommandR = renderText "R - Restart Game" "" (-420, 100, 0.1, 0.1)
     boxCommandK = renderText "Z - Rotate Left" "" (-420, 50, 0.1, 0.1)
     boxCommandL = renderText "X - Rotate Right" "" (-420, 1, 0.1, 0.1)
-    -- boxCommandX = renderText "Space - Put the piece down" "" (-420, -50, 0.1, 0.1)
+    boxCommandX = renderText "Space - Put the piece down" "" (-420, -50, 0.1, 0.1)
     boxOver
       | loseGame state = renderText "You" "Lose" (150, 100, 0.2, 0.2)
       | winGame state = renderText "You" "Win" (150, 100, 0.2, 0.2)
