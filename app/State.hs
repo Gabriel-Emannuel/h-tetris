@@ -68,6 +68,11 @@ originalState = putPreviewState State {
         firstPiecePrepared = preparePieceToPut firstPiece (xo, yo) (xf, yf)
 ---
 
+isOverState :: State -> Bool
+isOverState state = loseGame state || winGame state 
+
+---
+
 incrementScore :: State -> Int -> State
 incrementScore state newScore = state {score = (succ (level state) * newScore) + score state}
 

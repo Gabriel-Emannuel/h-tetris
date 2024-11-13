@@ -6,7 +6,7 @@ import Components (renderBoard, renderText, renderNextPiece)
 
 import Util (complementPiece)
 
-import State (originalState, State(..), rotateLeftState, moveLeftState, moveRightState, moveDownState, moveSpaceState, rotateRightState, incrementScore, getPiece, holdPieceState)
+import State (originalState, State(..), rotateLeftState, moveLeftState, moveRightState, moveDownState, moveSpaceState, rotateRightState, incrementScore, getPiece, holdPieceState, isOverState)
 
 import Graphics.Gloss.Interface.IO.Game (playIO, Event (EventKey), Key (Char, SpecialKey), KeyState (Down), SpecialKey (KeyLeft, KeyRight, KeyDown, KeySpace))
 import Data.Char (toLower)
@@ -20,6 +20,7 @@ inputKeyboard :: Event -> State -> IO State
 
 inputKeyboard (EventKey (Char t) Down _ _ ) state
   | t' == 'r' = return originalState
+  | isOverState state = return state
   | t' == 'z' = return $ rotateLeftState state
   | t' == 'x' = return $ rotateRightState state
   | t' == 'c' = return $ holdPieceState state
@@ -28,6 +29,7 @@ inputKeyboard (EventKey (Char t) Down _ _ ) state
     t' = toLower t
 
 inputKeyboard (EventKey (SpecialKey tecla) Down _ _) state
+  | isOverState state = return state
   | tecla == KeyLeft = return $ moveLeftState state
   | tecla == KeyRight = return $ moveRightState state
   | tecla == KeyDown = return $ incrementScore (moveDownState state) 1
