@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               tetris-haskell
-version:            0.1.1.0
+version:            0.1.1.1
 -- synopsis:
 -- description:
 license:            GPL-3.0-only
@@ -19,7 +19,7 @@ common warnings
 executable tetris-haskell
     import:           warnings
     main-is:          Main.hs
-    other-modules:    Controls, Pieces, State, Game, Components, ClearGame
+    other-modules:    Controls, Pieces, State, Game, Components, Util
     -- other-extensions:
     build-depends:    base ^>=4.17.2.1, gloss
     hs-source-dirs:   app

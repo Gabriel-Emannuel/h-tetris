@@ -4,6 +4,8 @@ import Graphics.Gloss
 
 import Components (renderBoard, renderText, renderNextPiece)
 
+import Util (complementPiece)
+
 import State (originalState, State(..), rotateLeftState, moveLeftState, moveRightState, moveDownState, moveSpaceState, rotateRightState, incrementScore, getPiece, holdPieceState)
 
 import Graphics.Gloss.Interface.IO.Game (playIO, Event (EventKey), Key (Char, SpecialKey), KeyState (Down), SpecialKey (KeyLeft, KeyRight, KeyDown, KeySpace))
@@ -28,7 +30,7 @@ inputKeyboard (EventKey (Char t) Down _ _ ) state
 inputKeyboard (EventKey (SpecialKey tecla) Down _ _) state
   | tecla == KeyLeft = return $ moveLeftState state
   | tecla == KeyRight = return $ moveRightState state
-  | tecla == KeyDown = return $ moveDownState state
+  | tecla == KeyDown = return $ incrementScore (moveDownState state) 1
   | tecla == KeySpace = return $ moveSpaceState state
   | otherwise = return state
 
@@ -63,8 +65,8 @@ renderMain state = return $ pictures [
     boxTotalLines = renderText "Lines" (show (totalLines state)) (150, -250, 0.2, 0.2)
     boxScore = renderText "Score" (show (score state)) (150, -150, 0.2, 0.2)
     boxTime = renderText "Time" (show (time state)) (150, -300, 0.2, 0.2)
-    boxNextPiece = renderNextPiece (reverse (getPiece (nextPiece state))) (300, -20) (180, -60) "Next Piece"
-    boxHoldPiece = renderNextPiece (reverse (getPiece (holdPiece state))) (300, 120) (180, 120) "Hold Piece" 
+    boxNextPiece = renderNextPiece ((complementPiece . reverse) (getPiece (nextPiece state))) (300, -20) (180, -60) "Next Piece"
+    boxHoldPiece = renderNextPiece ((complementPiece. reverse) (getPiece (holdPiece state))) (300, 120) (180, 120) "Hold Piece" 
     boxCommandA = renderText "Left Arrow - Move Left" "" (-420, 250, 0.1, 0.1)
     boxCommandD = renderText "Right Arrow - Move Right" "" (-420, 200, 0.1, 0.1)
     boxCommandS = renderText "Down Arrow - Move Down" "" (-420, 150, 0.1, 0.1)

@@ -12,7 +12,7 @@ import Pieces (
     removePiece, isPiece
     )
 
-import ClearGame (clearGame)
+import Util (clearGame)
 
 import Controls (
     isPossibleMoveDown, moveDown, moveSpace,
@@ -55,7 +55,7 @@ getPiece (Piece p _ _ _) = p
 ---
 
 originalState :: State
-originalState = State {
+originalState = putPreviewState State {
     board = putPiece originalBoard firstPiecePrepared,
     totalLines = 0, level = 0, time = 0, score = 0,
     piece = piece', nextPiece = generatePiece 1, holdPiece = Empty, isHolded = False,
@@ -76,7 +76,7 @@ incrementScore state newScore = state {score = (succ (level state) * newScore) +
 updateState :: State -> State
 updateState state
     | isPossiblePutPiece (board state) newPiecePrepared =
-        putPreviewState $ state {
+        putPreviewState state {
             board = putPiece newBoard newPiecePrepared,
             nextPiece = nextPiece',
             piece = nextPiece state,
@@ -85,7 +85,7 @@ updateState state
             score = newScore,
             isHolded = False
             }
-    | otherwise = putPreviewState $ state {loseGame = True}
+    | otherwise = putPreviewState state {loseGame = True}
     where
         nextPiece' = generatePiece (calculateNext (level state) (totalLines state) (time state) (score state))
         Piece _ piece' initialCoordenate finalCoordenate = nextPiece state
@@ -103,27 +103,28 @@ calculateNext level' lines' time' score' =
 
 moveRightState :: State -> State
 moveRightState state
-    | isPossibleMoveRight (removePreview (board state)) = putPreviewState $ state {board = (moveRight . removePreview) (board state)}
+    | isPossibleMoveRight (removePreview (board state)) = putPreviewState state {board = (moveRight . removePreview) (board state)}
     | otherwise = state
 
 moveLeftState :: State -> State
 moveLeftState state
-    | isPossibleMoveLeft (removePreview (board state)) = putPreviewState $ state {board = (moveLeft . removePreview) (board state)}
+    | isPossibleMoveLeft (removePreview (board state)) = putPreviewState state {board = (moveLeft . removePreview) (board state)}
     | otherwise = state
 
 moveDownState :: State -> State
-moveDownState state
-    | isPossibleMoveDown (removePreview (board state)) = putPreviewState $ incrementScore (state {board = newBoard }) 10
+moveDownState state 
+    | isPossibleMoveDown (removePreview (board state)) = putPreviewState (state {board = newBoard })
     | otherwise = updateState state
     where
         newBoard = moveDown (board state)
 
-moveSpaceState :: State -> State
+moveSpaceState :: State ->State
 moveSpaceState state
-    | isPossibleMoveDown (removePreview (board state)) = updateState $ incrementScore (state {board = newBoard}) (moveDowns * 15)
+    | isPossibleMoveDown (removePreview (board state)) = (f . updateState) (state {board = newBoard})
     | otherwise = updateState state
     where 
         (newBoard, moveDowns) = (moveSpace . removePreview) (board state)
+        f state = incrementScore state (moveDowns * 3)
 
 ---
 
@@ -162,11 +163,11 @@ holdPieceState :: State -> State
 holdPieceState state
     | isHolded state = state
     | isEmpty (holdPiece state) = updateHoldStatus $ updateState state {
-        board = removePiece (board state),
+        board = (removePiece . removePreview) (board state),
         holdPiece = piece state
         } 
     | otherwise = putPreviewState $ state {
-        board = putPiece (removePiece (board state)) piecePrepared,
+        board = putPiece ((removePiece . removePreview) (board state)) piecePrepared,
         holdPiece = piece state,
         piece = Piece original original initialCoordenate finalCoordenate,
         isHolded = True }
